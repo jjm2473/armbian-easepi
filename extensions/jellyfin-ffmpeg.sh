@@ -22,3 +22,14 @@ function extension_prepare_config__prepare_jellyfin-ffmpeg_config() {
 
 	add_packages_to_image ${FFMPEG_PACKAGE}
 }
+
+function pre_customize_image__jellyfin_ffmpeg_link() {
+	display_alert "Create link to jellyfin-ffmpeg binaries..." "${EXTENSION}" "info"
+
+	local p
+	for p in ffmpeg ffprobe; do
+		ln -s /usr/lib/jellyfin-ffmpeg/$p "${SDCARD}"/usr/local/bin/$p
+	done
+
+	return 0
+}
