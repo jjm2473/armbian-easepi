@@ -22,6 +22,8 @@ function output_images_compress_and_checksum() {
 		display_alert "No files to compress and checksum" "no images will be compressed" "wrn"
 		return 0
 	fi
+	local keep_raw
+	[[ $COMPRESS_OUTPUTIMAGE == *img* ]] && keep_raw="-k"
 
 	# loop over images
 	for uncompressed_file in "${images[@]}"; do
@@ -39,7 +41,7 @@ function output_images_compress_and_checksum() {
 
 		if [[ $COMPRESS_OUTPUTIMAGE == *xz* ]]; then
 			display_alert "Compressing with xz" "${uncompressed_file_basename}.xz" "info"
-			xz -T 0 "-${xz_compression_ratio_image}" "${uncompressed_file}" # "If xz is provided with input but no output, it will delete the input"
+			xz -T 0 ${keep_raw} "-${xz_compression_ratio_image}" "${uncompressed_file}" # "If xz is provided with input but no output, it will delete the input"
 			compression_type=".xz"
 		fi
 
@@ -47,6 +49,10 @@ function output_images_compress_and_checksum() {
 			display_alert "SHA256 calculating" "${uncompressed_file_basename}${compression_type}" "info"
 			# awk manipulation is needed to get rid of temporal folder path from SHA signature
 			sha256sum -b "${uncompressed_file}${compression_type}" | awk '{split($2, a, "/"); print $1, a[length(a)]}' > "${uncompressed_file}${compression_type}".sha
+			if [[ -n "${compression_type}" && -f "${uncompressed_file}" ]]; then
+				display_alert "SHA256 calculating" "${uncompressed_file_basename}" "info"
+				sha256sum -b "${uncompressed_file}" | awk '{split($2, a, "/"); print $1, a[length(a)]}' > "${uncompressed_file}".sha
+			fi
 		fi
 
 	done
