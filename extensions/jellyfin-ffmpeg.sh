@@ -1,4 +1,4 @@
-function custom_apt_repo__add_jellyfin-ffmpeg-repo() {
+function pre_install_distribution_specific__add_jellyfin-ffmpeg-repo() {
 	display_alert "Preparing jellyfin ffmpeg repository..." "${EXTENSION}" "info"
 
 	local keyring_url repo_url

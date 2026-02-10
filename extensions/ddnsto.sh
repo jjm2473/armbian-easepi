@@ -1,5 +1,5 @@
 
-function custom_apt_repo__ddnsto() {
+function pre_install_distribution_specific__ddnsto() {
 	display_alert "Preparing ddnsto binaries..." "${EXTENSION}" "info"
 	local suffix sha256
 	local CACHEDIR="${SRC}/cache/ddnsto"

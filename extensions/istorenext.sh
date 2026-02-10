@@ -3,7 +3,7 @@ enable_extension "jellyfin-ffmpeg"
 
 declare -g VENDOR="Armbian-istorenext"
 
-function custom_apt_repo__istorenext_add_desktop_repo() {
+function pre_install_distribution_specific__istorenext_add_desktop_repo() {
 	display_alert "Preparing iStoreNext desktop repository..." "${EXTENSION}" "info"
 
 	# chromium-headless-shell needs armbian desktop repo
