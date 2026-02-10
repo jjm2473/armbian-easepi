@@ -65,3 +65,9 @@ function pre_customize_image__istorenext_patch() {
 	chroot_sdcard /usr/local/bin/yt-dlp-upgrade.sh install || exit 1
 
 }
+
+function post_family_tweaks__istorenext_rootfs_part_size() {
+	display_alert "$BOARD" "Change Rootfs part size to 16GB" "info"
+	echo "30507008s" > "${SDCARD}/root/.rootfs_resize"
+	return 0
+}
