@@ -1,7 +1,8 @@
 enable_extension "ddnsto"
 enable_extension "jellyfin-ffmpeg"
 
-declare -g VENDOR="Armbian-istorenext"
+declare -g VENDOR="Armbian-iStoreNext"
+declare -g HOST="iStoreNext"
 
 function pre_install_distribution_specific__istorenext_add_desktop_repo() {
 	display_alert "Preparing iStoreNext desktop repository..." "${EXTENSION}" "info"
