@@ -68,7 +68,7 @@ function pre_customize_image__istorenext_patch() {
 }
 
 function post_family_tweaks__istorenext_rootfs_part_size() {
-	display_alert "$BOARD" "Change Rootfs part size to 16GB" "info"
+	display_alert "Change Rootfs part size to 16GB" "${EXTENSION}" "info"
 	echo "30507008s" > "${SDCARD}/root/.rootfs_resize"
 	return 0
 }
