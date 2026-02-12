@@ -33,7 +33,8 @@ function extension_prepare_config__prepare_istorenext_config() {
 		cifs-utils smbclient sshpass nfs-common rclone fuse3 \
 		aria2 qbittorrent-nox \
 		vim htop iproute2 dnsutils net-tools traceroute \
-		isc-dhcp-client dhcpcd dnsmasq pppoe
+		nftables \
+		isc-dhcp-client dhcpcd dnsmasq openresolv pppoe
 
 }
 
@@ -74,4 +75,22 @@ function post_family_tweaks__istorenext_rootfs_part_size() {
 	display_alert "Change Rootfs part size to 16GB" "${EXTENSION}" "info"
 	echo "30507008s" > "${SDCARD}/root/.rootfs_resize"
 	return 0
+}
+
+post_post_debootstrap_tweaks__istorenext_dnsmasq() {
+	display_alert "Configuring dnsmasq for iStoreNext..." "${EXTENSION}" "info"
+
+	# change resolv.conf after all packages installed, since this will break network in chroot,
+	# but we want to use openresolv instead of systemd-resolved in the final image.
+
+	# revert armbian /etc/resolv.conf symlink to systemd-resolved stub-resolv.conf.
+	rm -fv "${SDCARD}"/etc/resolv.conf
+	touch "${SDCARD}"/etc/resolv.conf
+
+	# openresolv merge dns servers for dnsmasq, see `man resolvconf.conf`.
+	cat <<- EOF >> "${SDCARD}"/etc/resolvconf.conf
+	name_servers=127.0.0.1
+	dnsmasq_conf=/etc/dnsmasq.d/resolvconf.conf
+	dnsmasq_resolv=/run/dnsmasq/resolv.conf
+	EOF
 }
