@@ -24,13 +24,16 @@ function extension_prepare_config__prepare_istorenext_config() {
 	fi
 
 	add_packages_to_image python3-pip pipx nginx \
-		docker.io qemu-system-x86 qemu-utils \
-		libvirt-daemon-system libvirt-clients virtinst ovmf cpu-checker websockify \
+		curl wget git rsync procps gpg \
+		docker.io qemu-system-x86 qemu-system-arm qemu-utils \
+		libvirt-daemon-system libvirt-clients virtinst ovmf qemu-efi-aarch64 cpu-checker websockify \
 		chromium-headless-shell fonts-noto-cjk fonts-noto-color-emoji ${MONO_FONTS} \
 		7zip unrar zip unzip xz-utils \
 		parted e2fsprogs xfsprogs btrfs-progs ntfs-3g dosfstools exfatprogs mdadm smartmontools \
-		cifs-utils smbclient sshpass nfs-common fuse3 \
-		aria2 qbittorrent-nox
+		cifs-utils smbclient sshpass nfs-common rclone fuse3 \
+		aria2 qbittorrent-nox \
+		vim htop iproute2 dnsutils net-tools traceroute \
+		isc-dhcp-client dhcpcd dnsmasq pppoe
 
 }
 
