@@ -16,3 +16,15 @@ function post_family_tweaks__easepi_r1_hold_dtb() {
 	chroot_sdcard apt-mark hold linux-dtb-vendor-rk35xx || true
 	return 0
 }
+
+function post_family_tweaks__easepi_r1_udev_network_interfaces() {
+	display_alert "$BOARD" "Renaming EasePi R1 network interfaces to lan0-3" "info"
+
+	mkdir -p $SDCARD/etc/udev/rules.d/
+	cat <<- EOF > "${SDCARD}/etc/udev/rules.d/70-persistent-net.rules"
+		SUBSYSTEM=="net", ACTION=="add", KERNELS=="fe010000.ethernet", NAME:="lan0"
+		SUBSYSTEM=="net", ACTION=="add", KERNELS=="fe2a0000.ethernet", NAME:="lan1"
+		SUBSYSTEM=="net", ACTION=="add", DRIVERS=="r8169", KERNELS=="0001:11:00.0", NAME:="lan2"
+		SUBSYSTEM=="net", ACTION=="add", DRIVERS=="r8169", KERNELS=="0000:01:00.0", NAME:="lan3"
+	EOF
+}
