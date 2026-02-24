@@ -34,6 +34,7 @@ function extension_prepare_config__prepare_istorenext_config() {
 		aria2 qbittorrent-nox \
 		vim htop iproute2 dnsutils net-tools traceroute \
 		nftables \
+		openvswitch-switch \
 		isc-dhcp-client dhcpcd dnsmasq openresolv pppoe \
 		docker-cli docker-compose
 
