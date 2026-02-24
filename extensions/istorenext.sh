@@ -49,7 +49,7 @@ function pre_customize_image__istorenext_patch() {
 	sed -i 's#/lib/systemd/systemd-networkd-wait-online$#/lib/systemd/systemd-networkd-wait-online --timeout=12#' \
 		"${SDCARD}"/lib/systemd/system/systemd-networkd-wait-online.service 2>/dev/null || true
 
-	ln -s chromium-headless-shell "${SDCARD}"/usr/bin/chromium-browser
+	ln -s chromium-headless-shell "${SDCARD}"/usr/bin/chromium
 
 
 	cat <<- EOF > "${SDCARD}"/usr/local/bin/yt-dlp-upgrade.sh
