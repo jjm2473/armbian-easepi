@@ -1,5 +1,6 @@
 enable_extension "ddnsto"
 enable_extension "jellyfin-ffmpeg"
+enable_extension "ndpi-upstream"
 
 declare -g VENDOR="Armbian-iStoreNext"
 declare -g HOST="iStoreNext"
@@ -34,7 +35,7 @@ function extension_prepare_config__prepare_istorenext_config() {
 		aria2 qbittorrent-nox \
 		vim htop iproute2 dnsutils net-tools traceroute \
 		nftables \
-		openvswitch-switch libndpi4.2t64 \
+		openvswitch-switch \
 		isc-dhcp-client dhcpcd dnsmasq openresolv pppoe \
 		docker-cli docker-compose
 
@@ -50,12 +51,6 @@ function pre_customize_image__istorenext_patch() {
 		"${SDCARD}"/lib/systemd/system/systemd-networkd-wait-online.service 2>/dev/null || true
 
 	ln -s chromium-headless-shell "${SDCARD}"/usr/bin/chromium
-
-	if [[ "${ARCH}" = "amd64" ]]; then
-		ln -s libndpi.so.4.2.0 "${SDCARD}"/lib/x86_64-linux-gnu/libndpi.so.5
-	elif [[ "${ARCH}" = "arm64" ]]; then
-		ln -s libndpi.so.4.2.0 "${SDCARD}"/lib/aarch64-linux-gnu/libndpi.so.5
-	fi
 
 	cat <<- EOF > "${SDCARD}"/usr/local/bin/yt-dlp-upgrade.sh
 	#!/bin/sh
