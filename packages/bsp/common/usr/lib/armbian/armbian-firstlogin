@@ -770,7 +770,11 @@ if [[ -f /root/.not_logged_in_yet && -n $(tty) ]]; then
 	while [ -f "/root/.not_logged_in_yet" ]; do
 		. /root/.not_logged_in_yet
 		if [ -z "$PRESET_ROOT_PASSWORD" ];then
-			read_password "Create root"
+			while :; do
+				read_password "Create root"
+				[ -z "$password" ] || break
+				echo ""
+			done
 		else
 			# allow automated install also in interactive session
 			#if [ "$(who am i | awk '{print $2}')" != "tty1" ];then
@@ -853,6 +857,9 @@ if [[ -f /root/.not_logged_in_yet && -n $(tty) ]]; then
 	trap '' 2
 	set_shell
 	trap - INT TERM EXIT
+
+	# skip remaining steps
+	check_abort
 
 	trap check_abort INT
 
