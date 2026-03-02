@@ -17,6 +17,6 @@ iface lo inet loopback
 
 auto ${DEFAULT_INTERFACE}
 iface ${DEFAULT_INTERFACE} inet static
-    address 192.168.100.1
+    address 192.168.1.1
     netmask 255.255.255.0
 EOF
