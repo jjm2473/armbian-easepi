@@ -24,10 +24,15 @@ function extension_prepare_config__prepare_istorenext_config() {
 		MONO_FONTS="fonts-dejavu-core"
 	fi
 
+	if [[ "${ARCH}" = "amd64" ]]; then
+		add_packages_to_image qemu-system-x86 qemu-system-arm qemu-utils \
+		libvirt-daemon-system libvirt-clients virtinst ovmf qemu-efi-aarch64 cpu-checker
+	fi
+
 	add_packages_to_image python3-pip pipx nginx \
 		curl wget git rsync procps gpg \
-		docker.io qemu-system-x86 qemu-system-arm qemu-utils \
-		libvirt-daemon-system libvirt-clients virtinst ovmf qemu-efi-aarch64 cpu-checker websockify \
+		docker.io \
+		websockify \
 		chromium-headless-shell fonts-noto-cjk fonts-noto-color-emoji ${MONO_FONTS} \
 		7zip unrar zip unzip xz-utils \
 		parted e2fsprogs xfsprogs btrfs-progs ntfs-3g dosfstools exfatprogs mdadm smartmontools \
