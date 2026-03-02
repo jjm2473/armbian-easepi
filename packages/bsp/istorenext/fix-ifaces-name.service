@@ -2,7 +2,7 @@
 Description=Fix network interface names before network starts
 DefaultDependencies=no
 After=systemd-udev-settle.service
-Before=network-pre.target network.target networking.service ifupdown-pre.service
+Before=network-pre.target network.target networking.service ifupdown-pre.service istorenext-init-network.service
 
 [Service]
 Type=oneshot

@@ -10,4 +10,4 @@ RemainAfterExit=yes
 ExecStart=/usr/lib/istorenext/istorenext-init-network
 
 [Install]
-WantedBy=basic.target
+WantedBy=networking.service
