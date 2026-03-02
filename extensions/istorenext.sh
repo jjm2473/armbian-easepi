@@ -90,11 +90,17 @@ function post_family_tweaks__istorenext_rootfs_copy() {
 	cp -f "${SRC}"/packages/bsp/istorenext/istorenext-init-network.service \
 			"${SDCARD}"/etc/systemd/system/istorenext-init-network.service
 
+	cp -f "${SRC}"/packages/bsp/istorenext/fix-ifaces-name \
+			"${SDCARD}"/usr/lib/istorenext/fix-ifaces-name
+	cp -f "${SRC}"/packages/bsp/istorenext/fix-ifaces-name.service \
+			"${SDCARD}"/etc/systemd/system/fix-ifaces-name.service
+
 }
 
 post_post_debootstrap_tweaks__istorenext_network() {
 	display_alert "Configuring network for iStoreNext..." "${EXTENSION}" "info"
 
+	chroot_sdcard systemctl --no-reload enable fix-ifaces-name.service
 	chroot_sdcard systemctl --no-reload enable networking.service
 	chroot_sdcard systemctl --no-reload enable istorenext-init-network.service
 	chroot_sdcard systemctl --no-reload disable dhcpcd.service

@@ -1,0 +1,15 @@
+[Unit]
+Description=Fix network interface names before network starts
+DefaultDependencies=no
+After=systemd-udev-settle.service
+Before=network-pre.target network.target networking.service ifupdown-pre.service
+
+[Service]
+Type=oneshot
+ExecStart=/usr/lib/istorenext/fix-ifaces-name
+RemainAfterExit=yes
+StandardOutput=journal
+StandardError=journal
+
+[Install]
+WantedBy=sysinit.target
