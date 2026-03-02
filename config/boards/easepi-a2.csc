@@ -22,3 +22,7 @@ function post_family_tweaks__easepi_a2_root_part_size() {
 	echo "50%" > "${SDCARD}/root/.rootfs_resize"
 	return 0
 }
+
+function post_family_tweaks__easepi_a2_udev_network_interfaces() {
+	echo "DEFAULT_INTERFACE=eth0" >/root/.default-network
+}

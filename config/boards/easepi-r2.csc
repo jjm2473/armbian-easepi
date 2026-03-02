@@ -45,4 +45,7 @@ function post_family_tweaks__easepi_r2_udev_network_interfaces() {
 		SUBSYSTEM=="net", ACTION=="add", DRIVERS=="r8169", KERNELS=="0003:31:00.0", NAME:="eth3"
 		SUBSYSTEM=="net", ACTION=="add", KERNELS=="fc800000.usb", NAME:="usb4g"
 	EOF
+
+	echo "DEFAULT_INTERFACE=eth3" >/root/.default-network
+
 }
