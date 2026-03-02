@@ -1,0 +1,13 @@
+
+[Unit]
+Description=iStoreNext Default Network
+After=local-fs.target
+Before=networking.service
+
+[Service]
+Type=oneshot
+RemainAfterExit=yes
+ExecStart=/usr/lib/istorenext/istorenext-init-network
+
+[Install]
+WantedBy=basic.target

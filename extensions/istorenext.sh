@@ -37,6 +37,7 @@ function extension_prepare_config__prepare_istorenext_config() {
 		nftables \
 		openvswitch-switch \
 		isc-dhcp-client dhcpcd dnsmasq openresolv pppoe \
+		ifupdown-ng ifupdown-ng-compat \
 		docker-cli docker-compose
 
 }
@@ -79,8 +80,23 @@ function post_family_tweaks__istorenext_rootfs_part_size() {
 	return 0
 }
 
-post_post_debootstrap_tweaks__istorenext_dnsmasq() {
-	display_alert "Configuring dnsmasq for iStoreNext..." "${EXTENSION}" "info"
+function post_family_tweaks__istorenext_rootfs_copy() {
+	display_alert "Copying iStoreNext files..." "${EXTENSION}" "info"
+
+	mkdir -p "${SDCARD}"/usr/lib/istorenext
+
+	cp -f "${SRC}"/packages/bsp/istorenext/istorenext-init-network \
+			"${SDCARD}"/usr/lib/istorenext/istorenext-init-network
+	cp -f "${SRC}"/packages/bsp/istorenext/istorenext-init-network.service \
+			"${SDCARD}"/etc/systemd/system/istorenext-init-network.service
+
+}
+
+post_post_debootstrap_tweaks__istorenext_network() {
+	display_alert "Configuring network for iStoreNext..." "${EXTENSION}" "info"
+
+	chroot_sdcard systemctl --no-reload enable networking.service
+	chroot_sdcard systemctl --no-reload enable istorenext-init-network.service
 
 	# change resolv.conf after all packages installed, since this will break network in chroot,
 	# but we want to use openresolv instead of systemd-resolved in the final image.
