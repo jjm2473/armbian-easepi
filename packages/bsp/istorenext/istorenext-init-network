@@ -2,11 +2,12 @@
 
 systemctl disable istorenext-init-network
 
-[ -f /root/.default-network ] || exit 0
-
-. /root/.default-network
-
-rm -f /root/.default-network
+if [ -f /root/.default-network ]; then
+	. /root/.default-network
+	rm -f /root/.default-network
+else
+	DEFAULT_INTERFACE=$( ( cd /sys/class/net && ls | grep ^eth ) | sort -V | tail -1 )
+fi
 
 [ -z "${DEFAULT_INTERFACE}" ] && exit 0
 

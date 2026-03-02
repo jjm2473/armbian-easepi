@@ -38,11 +38,30 @@ reorder_eth() {
 	done
 }
 
+rename_only() {
+	local index=0
+	local iface toiface
+	while [[ -n "$1" ]]; do
+		toiface="eth$index"
+		iface=$1
+		if [[ -n "$iface" && "$iface" != "$toiface" ]]; then
+			rename_iface $toiface rename_tmp 2>/dev/null
+			rename_iface $iface $toiface
+			rename_iface rename_tmp $iface 2>/dev/null
+		fi
+		index=$(( $index + 1 ))
+		shift
+	done
+}
+
 if [[ -s /proc/device-tree/eth_order || -s /etc/eth_order ]]; then
 	if [[ -s /proc/device-tree/eth_order ]]; then
 		reorder_eth $(cat /proc/device-tree/eth_order | tr ',' ' ' )
 	else
 		reorder_eth $(cat /etc/eth_order | tr ',' ' ' )
 	fi
+else
+	# x86 or vms without eth_order, just rename by original name, since they are stable enough
+	rename_only $( ( cd /sys/class/net && ls | grep ^enp ) | sort -V )
 fi
 
