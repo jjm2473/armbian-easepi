@@ -27,4 +27,7 @@ function post_family_tweaks__easepi_r1_udev_network_interfaces() {
 		SUBSYSTEM=="net", ACTION=="add", DRIVERS=="r8169", KERNELS=="0001:11:00.0", NAME:="eth2"
 		SUBSYSTEM=="net", ACTION=="add", DRIVERS=="r8169", KERNELS=="0000:01:00.0", NAME:="eth3"
 	EOF
+
+	echo "DEFAULT_INTERFACE=eth3" >/root/.default-network
+
 }
