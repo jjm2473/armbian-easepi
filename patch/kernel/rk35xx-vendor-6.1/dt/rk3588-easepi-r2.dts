@@ -426,6 +426,12 @@
 	};
 };
 
+&i2c7 {
+	pinctrl-names = "default";
+	pinctrl-0 = <&i2c7m0_xfer>;
+	status = "okay";
+};
+
 &pcie2x1l0 {
 	// idx3,p0l1 => rtl8125
 	pinctrl-names = "default";
