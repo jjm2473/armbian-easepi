@@ -111,6 +111,8 @@ post_post_debootstrap_tweaks__istorenext_network() {
 	chroot_sdcard systemctl --no-reload enable istorenext-init-network.service
 	chroot_sdcard systemctl --no-reload disable dhcpcd.service
 
+	chroot_sdcard systemctl --no-reload enable serial-option-new-id.service
+
 	# change resolv.conf after all packages installed, since this will break network in chroot,
 	# but we want to use openresolv instead of systemd-resolved in the final image.
 

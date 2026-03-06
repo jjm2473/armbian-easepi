@@ -1,0 +1,13 @@
+[Unit]
+Description=Support new usb-serial ID
+DefaultDependencies=no
+After=systemd-sysusers.service systemd-hwdb-update.service
+Before=systemd-udevd.service systemd-udev-trigger.service
+
+[Service]
+ExecStart=/usr/lib/wwan/serial-option-new-id
+Type=oneshot
+RemainAfterExit=yes
+
+[Install]
+WantedBy=sysinit.target
