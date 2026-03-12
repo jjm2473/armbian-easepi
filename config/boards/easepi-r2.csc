@@ -12,6 +12,10 @@ BOOT_SOC="rk3588"
 IMAGE_PARTITION_TABLE="gpt"
 BOOTFS_TYPE="fat"
 
+function post_family_config__easepi_r2_extra_packages() {
+	add_packages_to_image "v4l-utils"
+}
+
 function post_family_tweaks__easepi_r2_hold_dtb() {
 	display_alert "$BOARD" "Prevent armbian-upgrade from removing our dtb" "info"
 	chroot_sdcard apt-mark hold linux-dtb-vendor-rk35xx || true
