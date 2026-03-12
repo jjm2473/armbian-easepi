@@ -42,7 +42,7 @@ function extension_prepare_config__prepare_istorenext_config() {
 		vim htop iproute2 dnsutils net-tools traceroute \
 		nftables \
 		openvswitch-switch \
-		modemmanager \
+		modemmanager wpasupplicant hostapd \
 		isc-dhcp-client dhcpcd dnsmasq openresolv pppoe \
 		ifupdown-ng ifupdown-ng-compat \
 		docker-cli docker-compose
