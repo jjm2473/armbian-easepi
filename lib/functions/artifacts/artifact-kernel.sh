@@ -91,6 +91,7 @@ function artifact_kernel_prepare_version() {
 	# get the kernel patches hash...
 	# @TODO: why not just delegate this to the python patching, with some "dry-run" / hash-only option?
 	declare patches_hash="undetermined"
+	declare patches_core_hash="undetermined"
 	declare hash_files="undetermined"
 	display_alert "User patches directory for kernel" "${USERPATCHES_PATH}/kernel/${KERNELPATCHDIR}" "info"
 	declare -a kernel_patch_dirs=()
@@ -99,6 +100,24 @@ function artifact_kernel_prepare_version() {
 	done
 	calculate_hash_for_all_files_in_dirs "${kernel_patch_dirs[@]}"
 	patches_hash="${hash_files}"
+
+	# Hash only "core" patch inputs by excluding patch-config-driven DT source directories.
+	# This is used to decide if we can keep an already-patched kernel tree and only refresh copied DT/overlay sources.
+	declare -a kernel_core_patch_files=()
+	for patch_dir in "${kernel_patch_dirs[@]}"; do
+		if [[ ! -d "${patch_dir}" ]]; then
+			continue
+		fi
+		declare -a files_in_dir=()
+		mapfile -t files_in_dir < <(find -L "${patch_dir}" -type f ! -path "*/dt/*" ! -path "*/overlay/*")
+		if [[ ${#files_in_dir[@]} -gt 0 ]]; then
+			kernel_core_patch_files+=("${files_in_dir[@]}")
+		fi
+	done
+	calculate_hash_for_files "${kernel_core_patch_files[@]}"
+	patches_core_hash="${hash_files}"
+	declare -g KERNEL_PATCH_CORE_HASH="${patches_core_hash}"
+	display_alert "Kernel core patch hash (excluding dt/overlay dirs)" "${KERNEL_PATCH_CORE_HASH}" "debug"
 	declare kernel_patches_hash_short="${patches_hash:0:${short_hash_size}}"
 
 	# detour: if CREATE_PATCHES=yes, then force "999999" (six-nines)

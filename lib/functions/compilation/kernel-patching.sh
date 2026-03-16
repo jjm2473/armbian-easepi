@@ -70,6 +70,41 @@ function kernel_main_patching_python() {
 	return 0
 }
 
+function kernel_main_copy_dts_only_python() {
+	prepare_python_and_pip
+
+	declare patch_debug="${SHOW_DEBUG:-${DEBUG_PATCHING:-"no"}}"
+
+	declare -a params_quoted=(
+		"${PYTHON3_VARS[@]}"
+		"LOG_DEBUG=${patch_debug}"
+		"SRC=${SRC}"
+		"PATCH_TYPE=kernel"
+		"PATCH_DIRS_TO_APPLY=${KERNELPATCHDIR}"
+		"USERPATCHES_PATH=${USERPATCHES_PATH}"
+		"GIT_WORK_DIR=${kernel_work_dir}"
+		"COPY_DTS_ONLY=yes"
+		"APPLY_PATCHES=no"
+		"COLUMNS=${COLUMNS}"
+		"COLORFGBG=${COLORFGBG}"
+		"GITHUB_ACTIONS=${GITHUB_ACTIONS}"
+		"PATH=${PATH}"
+		"HOME=${HOME}"
+	)
+
+	display_alert "Refreshing DT/overlay directories only" "${KERNELPATCHDIR}" "info"
+
+	raw_command="[...shortened kernel dts refresh...] ${PYTHON3_INFO[BIN]} ${SRC}/lib/tools/patching.py" \
+		run_host_command_logged env -i "${params_quoted[@]@Q}" "${PYTHON3_INFO[BIN]}" "${SRC}/lib/tools/patching.py"
+
+	return 0
+}
+
+function kernel_main_copy_dts_only() {
+	LOG_SECTION="kernel_main_copy_dts_only_python" do_with_logging do_with_hooks kernel_main_copy_dts_only_python
+	return 0
+}
+
 function kernel_main_patching() {
 	# kernel_drivers_create_patches will fill the variables below
 	declare kernel_drivers_patch_file kernel_drivers_patch_hash
@@ -77,6 +112,11 @@ function kernel_main_patching() {
 
 	# Python patching will git reset to the kernel SHA1 git revision, and remove all untracked files.
 	LOG_SECTION="kernel_main_patching_python" do_with_logging do_with_hooks kernel_main_patching_python
+
+	if [[ -n "${KERNEL_PATCH_CORE_HASH:-}" ]]; then
+		printf '%s\n' "${KERNEL_PATCH_CORE_HASH}" > "${kernel_work_dir}/.core-patch-hash"
+		display_alert "Updated kernel core patch hash marker" "${kernel_work_dir}/.core-patch-hash" "debug"
+	fi
 
 	# STOP HERE, for cli support for patching tools.
 	if [[ "${PATCH_ONLY}" == "yes" ]]; then
