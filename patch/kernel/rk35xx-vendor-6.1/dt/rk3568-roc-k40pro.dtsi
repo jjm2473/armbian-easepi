@@ -25,14 +25,14 @@
 		ethernet0 = &gmac0;
 		ethernet1 = &gmac1;
 
-		led-boot 	 = &led_green;
+		led-boot     = &led_green;
 		led-failsafe = &led_green;
 		led-running  = &led_green;
 		led-upgrade  = &led_green;
 	};
 
 	chosen: chosen {
-		bootargs = "earlycon=uart8250,mmio32,0xfe660000 console=ttyFIQ0 rootpart=mmcblk1p3 rw rootwait autoresize=mmcblk1p4";
+		bootargs = "earlycon=uart8250,mmio32,0xfe660000 console=ttyFIQ0";
 	};
 
 	adc_keys: adc-keys {
@@ -277,9 +277,9 @@
 		led_green: green {
 			gpios = <&gpio2 RK_PD7 GPIO_ACTIVE_HIGH>;
 			label = "green:sys";
-			linux,default-trigger = "timer";
+			linux,default-trigger = "heartbeat";
 		};
-		
+
 	};
 
 };
