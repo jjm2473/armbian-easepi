@@ -9,6 +9,7 @@
 #
 import logging
 import os
+import sys
 
 import rich.box
 # Let's use GitPython to query and manipulate the git repo
@@ -46,10 +47,12 @@ PATCHES_TO_GIT = armbian_utils.get_from_env("PATCHES_TO_GIT")
 REWRITE_PATCHES = armbian_utils.get_from_env("REWRITE_PATCHES")
 REWRITE_PATCHES_NEEDING_REBASE = armbian_utils.get_from_env("REWRITE_PATCHES_NEEDING_REBASE")
 SPLIT_PATCHES = armbian_utils.get_from_env("SPLIT_PATCHES")
+COPY_DTS_ONLY = armbian_utils.get_from_env("COPY_DTS_ONLY")
 ALLOW_RECREATE_EXISTING_FILES = armbian_utils.get_from_env("ALLOW_RECREATE_EXISTING_FILES")
 GIT_ARCHEOLOGY = armbian_utils.get_from_env("GIT_ARCHEOLOGY")
 FAST_ARCHEOLOGY = armbian_utils.get_from_env("FAST_ARCHEOLOGY")
 apply_patches = APPLY_PATCHES == "yes"
+copy_dts_only = COPY_DTS_ONLY == "yes"
 apply_patches_to_git = PATCHES_TO_GIT == "yes"
 git_archeology = GIT_ARCHEOLOGY == "yes"
 fast_archeology = FAST_ARCHEOLOGY == "yes"
@@ -120,6 +123,38 @@ for root_type in CONST_ROOT_TYPES_CONFIG_ORDER:
 
 # load the configs and merge them.
 pconfig: PatchingConfig = PatchingConfig(all_yaml_config_files)
+
+if copy_dts_only:
+	if GIT_WORK_DIR is None:
+		raise Exception("GIT_WORK_DIR must be set when COPY_DTS_ONLY=yes")
+
+	log.info(
+		"COPY_DTS_ONLY=yes: refreshing dts-directories/overlay-directories and DT Makefiles "
+		"using existing patching-config logic."
+	)
+	autopatcher_params: dt_makefile_patcher.AutoPatcherParams = dt_makefile_patcher.AutoPatcherParams(
+		pconfig, GIT_WORK_DIR, CONST_ROOT_TYPES_CONFIG_ORDER, ROOT_DIRS_BY_ROOT_TYPE, False, None
+	)
+
+	if pconfig.has_dts_directories:
+		dt_makefile_patcher.copy_bare_files(autopatcher_params, "dt")
+	else:
+		log.info("No dts-directories configured in patching config; nothing to copy.")
+
+	if pconfig.has_overlay_directories:
+		dt_makefile_patcher.copy_bare_files(autopatcher_params, "overlay")
+	else:
+		log.info("No overlay-directories configured in patching config; nothing to copy.")
+
+	if pconfig.has_autopatch_makefile_dt_configs:
+		dt_makefile_patcher.auto_patch_all_dt_makefiles(autopatcher_params)
+
+	log.info(
+		f"COPY_DTS_ONLY completed: copied {len(autopatcher_params.all_dt_files_copied)} dt files "
+		f"and {len(autopatcher_params.all_overlay_files_copied)} overlay files."
+	)
+
+	sys.exit(0)
 
 PATCH_FILES_FIRST: list[patching_utils.PatchFileInDir] = []
 EXTRA_PATCH_FILES_FIRST: list[str] = armbian_utils.parse_env_for_tokens("EXTRA_PATCH_FILES_FIRST")

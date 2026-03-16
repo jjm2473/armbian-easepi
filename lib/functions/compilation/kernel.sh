@@ -9,7 +9,23 @@
 
 function compile_kernel() {
 	declare kernel_work_dir="${SRC}/cache/sources/${LINUXSOURCEDIR}"
+	declare kernel_core_patch_hash_file="${kernel_work_dir}/.core-patch-hash"
+	declare kernel_reuse_dts_only="no"
 	display_alert "Kernel build starting" "${LINUXSOURCEDIR}" "info"
+
+	if [[ "${PATCH_ONLY}" != "yes" && "${CREATE_PATCHES}" != "yes" && -n "${KERNEL_PATCH_CORE_HASH:-}" && -f "${kernel_core_patch_hash_file}" && -e "${kernel_work_dir}/.git" ]]; then
+		declare stored_kernel_core_patch_hash=""
+		read -r stored_kernel_core_patch_hash < "${kernel_core_patch_hash_file}" || true
+		display_alert "Kernel core patch hash compare" "stored='${stored_kernel_core_patch_hash}' current='${KERNEL_PATCH_CORE_HASH}'" "debug"
+		if [[ "${stored_kernel_core_patch_hash}" == "${KERNEL_PATCH_CORE_HASH}" ]]; then
+			kernel_reuse_dts_only="yes"
+			display_alert "Kernel core patch hash unchanged" "reusing patched source tree; will refresh DTS-only inputs" "cachehit"
+		else
+			display_alert "Kernel core patch hash changed" "will run full kernel patching flow" "info"
+		fi
+	elif [[ "${PATCH_ONLY}" != "yes" && "${CREATE_PATCHES}" != "yes" && -n "${KERNEL_PATCH_CORE_HASH:-}" ]]; then
+		display_alert "Kernel core patch hash marker missing/unusable" "will run full kernel patching flow" "debug"
+	fi
 
 	# Prepare the git bare repo for the kernel; shared between all kernel builds
 	declare kernel_git_bare_tree
@@ -32,7 +48,13 @@ function compile_kernel() {
 
 	# prepare the working copy; this is the actual kernel source tree for this build
 	declare checked_out_revision_ts="" checked_out_revision="undetermined" # set by fetch_from_repo
-	LOG_SECTION="kernel_prepare_git" do_with_logging_unless_user_terminal do_with_hooks kernel_prepare_git
+	if [[ "${kernel_reuse_dts_only}" == "yes" ]]; then
+		checked_out_revision="$(cd "${kernel_work_dir}" && git rev-parse HEAD)" || exit_with_error "Failed to read current kernel git revision from ${kernel_work_dir}"
+		checked_out_revision_ts="$(cd "${kernel_work_dir}" && git log -1 --pretty=%ct HEAD)" || exit_with_error "Failed to read current kernel git revision timestamp from ${kernel_work_dir}"
+		display_alert "Skipping kernel_prepare_git" "reusing existing kernel work dir for DTS-only refresh" "info"
+	else
+		LOG_SECTION="kernel_prepare_git" do_with_logging_unless_user_terminal do_with_hooks kernel_prepare_git
+	fi
 
 	# Capture date variables set by fetch_from_repo; it's the date of the last kernel revision
 	declare kernel_git_revision="${checked_out_revision}"
@@ -51,7 +73,11 @@ function compile_kernel() {
 
 	# Patching.
 	declare hash pre_patch_version
-	kernel_main_patching # has it's own logging sections inside
+	if [[ "${kernel_reuse_dts_only}" == "yes" ]]; then
+		kernel_main_copy_dts_only # has it's own logging sections inside
+	else
+		kernel_main_patching # has it's own logging sections inside
+	fi
 
 	# Stop after patching.
 	if [[ "${PATCH_ONLY}" == yes ]]; then
