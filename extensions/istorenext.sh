@@ -2,6 +2,7 @@ enable_extension "ddnsto"
 enable_extension "jellyfin-ffmpeg"
 enable_extension "ndpi-upstream"
 enable_extension "frp"
+enable_extension "sing-box"
 
 declare -g VENDOR="Armbian-iStoreNext"
 declare -g HOST="iStoreNext"
