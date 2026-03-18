@@ -4,8 +4,11 @@ enable_extension "ndpi-upstream"
 enable_extension "frp"
 enable_extension "sing-box"
 
-declare -g VENDOR="Armbian-iStoreNext"
+declare -g SKIP_ARMBIAN_REPO="yes"
+declare -g VENDOR="iStoreNextA"
 declare -g HOST="iStoreNext"
+declare -g CONSOLE_AUTOLOGIN="no"
+declare -g ROOTPWD="tobechanged"
 
 function pre_install_distribution_specific__istorenext_add_desktop_repo() {
 	display_alert "Preparing iStoreNext desktop repository..." "${EXTENSION}" "info"
@@ -52,6 +55,14 @@ function extension_prepare_config__prepare_istorenext_config() {
 
 function pre_customize_image__istorenext_patch() {
 	display_alert "Apply iStoreNext rootfs patches..." "${EXTENSION}" "info"
+
+	echo "Disable armbian services that are not compatible with iStoreNext"
+	# diable armbian firstlogin
+	rm -f "${SDCARD}"/root/.not_logged_in_yet
+
+	# disable armbian-config, since it is not compatible with iStoreNext and we don't want users to accidentally use it and break their system.
+	rm -f "${SDCARD}"/etc/apt/sources.list.d/armbian-config.sources
+	chroot_sdcard apt remove -y armbian-config || true
 
 	rm -f "${SDCARD}"/etc/apt/sources.list.d/temp.list "${SDCARD}"/etc/apt/sources.list.d/temp.sources || true
 
