@@ -174,7 +174,11 @@ function artifact_kernel_prepare_version() {
 
 	# get the hashes of the lib/ bash sources involved...
 	declare hash_files="undetermined"
-	calculate_hash_for_bash_deb_artifact "${SRC}"/lib/functions/compilation/kernel*.sh # expansion
+	if [ -s "${SRC}/userpatches/hash-${REVISION}-kernel-bash" ]; then
+		hash_files=$(cat "${SRC}/userpatches/hash-${REVISION}-kernel-bash")
+	else
+		calculate_hash_for_bash_deb_artifact "${SRC}"/lib/functions/compilation/kernel*.sh # expansion
+	fi
 	declare bash_hash="${hash_files}"
 	declare bash_hash_short="${bash_hash:0:${short_hash_size}}"
 
