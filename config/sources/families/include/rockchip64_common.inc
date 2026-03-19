@@ -441,3 +441,8 @@ function post_family_config__900_late_default_serial_console_by_branch() {
 
 	display_alert "rockchip64_common: defaulting SERIALCON" "final SERIALCON: '${SERIALCON}' for BRANCH='${BRANCH}' SOC='${BOOT_SOC}'" "debug"
 }
+
+function post_family_tweaks__rockchip64-clean-firmware() {
+	display_alert "$BOARD" "Remove useless firmwares for rockchip platform" "info"
+	rm -rf "${SDCARD}"/lib/firmware/qcom
+}
