@@ -1,5 +1,6 @@
 # Rockchip RK3588 SoC octa core 16GB RAM 64GB eMMC USB3 NVMe 2x SATA 4x 2.5GbE 4G WiFi/BT HDMI HDMI-In
 BOARD_NAME="EasePi R2"
+BOARD_VENDOR="linkease"
 BOARDFAMILY="rockchip-rk3588"
 BOARD_MAINTAINER="jjm2473"
 BOOTCONFIG="rk3588-generic_defconfig"

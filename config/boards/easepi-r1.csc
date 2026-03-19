@@ -1,5 +1,6 @@
 # Rockchip RK3568 SoC quad core 2-4GB RAM 16GB eMMC 2x GbE 2x 2.5GbE HDMI NVMe USB3
 BOARD_NAME="EasePi R1"
+BOARD_VENDOR="linkease"
 BOARDFAMILY="rk35xx"
 BOARD_MAINTAINER="jjm2473"
 BOOTCONFIG="radxa-e25-rk3568_defconfig"
