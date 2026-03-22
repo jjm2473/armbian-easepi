@@ -1,0 +1,13 @@
+Index: 6.1__rk35xx__arm64/drivers/net/ethernet/realtek/r8125/r8125_n.c
+===================================================================
+--- 6.1__rk35xx__arm64.orig/drivers/net/ethernet/realtek/r8125/r8125_n.c
++++ 6.1__rk35xx__arm64/drivers/net/ethernet/realtek/r8125/r8125_n.c
+@@ -7655,7 +7655,7 @@ static void rtl8125_get_mac_version(stru
+                 break;
+         }
+ 
+-        if (pdev->device == 0x8162) {
++        if (pdev->subsystem_vendor == 0x8162) {
+                 if (tp->mcfg == CFG_METHOD_3)
+                         tp->mcfg = CFG_METHOD_6;
+                 else if (tp->mcfg == CFG_METHOD_5)

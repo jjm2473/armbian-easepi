@@ -21,6 +21,9 @@ config:
   auto-patch-dt-makefile:
     - { incremental: true, directory: "arch/arm64/boot/dts/rockchip", config-var: "CONFIG_ARCH_ROCKCHIP" }
 
+  src-directories:
+    - { source: "r8125/src", target: "drivers/net/ethernet/realtek/r8125" }
+
   # configuration for when applying patches to git / auto-rewriting patches (development cycle helpers)
   patches-to-git:
     do-not-commit-files:

@@ -1,0 +1,36 @@
+Index: 6.1__rk35xx__arm64/drivers/net/ethernet/realtek/Kconfig
+===================================================================
+--- 6.1__rk35xx__arm64.orig/drivers/net/ethernet/realtek/Kconfig
++++ 6.1__rk35xx__arm64/drivers/net/ethernet/realtek/Kconfig
+@@ -31,6 +31,19 @@ config ATP
+ 	  To compile this driver as a module, choose M here: the module
+ 	  will be called atp.
+ 
++config R8125
++	tristate "Realtek 8125 PCI 2.5 Gigabit ethernet support"
++	depends on PCI
++	select FW_LOADER
++	select CRC32
++	select PHYLIB
++	select REALTEK_PHY
++	help
++	  Say Y here if you have a Realtek 8125 PCI 2.5 Gigabit Ethernet adapter.
++
++	  To compile this driver as a module, choose M here: the module
++	  will be called r8125.  This is recommended.
++
+ config 8139CP
+ 	tristate "RealTek RTL-8139 C+ PCI Fast Ethernet Adapter support"
+ 	depends on PCI
+Index: 6.1__rk35xx__arm64/drivers/net/ethernet/realtek/Makefile
+===================================================================
+--- 6.1__rk35xx__arm64.orig/drivers/net/ethernet/realtek/Makefile
++++ 6.1__rk35xx__arm64/drivers/net/ethernet/realtek/Makefile
+@@ -3,6 +3,7 @@
+ # Makefile for the Realtek network device drivers.
+ #
+ 
++obj-$(CONFIG_R8125) += r8125/
+ obj-$(CONFIG_8139CP) += 8139cp.o
+ obj-$(CONFIG_8139TOO) += 8139too.o
+ obj-$(CONFIG_ATP) += atp.o
