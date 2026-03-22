@@ -41,6 +41,15 @@ class PatchingOverlayDirectoryConfig:
 		return f"PatchingOverlayDirectoryConfig(source={self.source}, target={self.target})"
 
 
+class PatchingSrcDirectoryConfig:
+	def __init__(self, data: dict):
+		self.source: str = data.get("source", None)
+		self.target: str = data.get("target", "")  # default to source tree root
+
+	def __str__(self):
+		return f"PatchingSrcDirectoryConfig(source={self.source}, target={self.target})"
+
+
 class PatchingToGitConfig:
 	def __init__(self, data: dict):
 		self.do_not_commit_files: list[str] = data.get("do-not-commit-files", [])
@@ -79,6 +88,12 @@ class PatchingConfig:
 			PatchingOverlayDirectoryConfig(data) for data in self.yaml_config.get("overlay-directories", [])
 		]
 		self.has_overlay_directories: bool = len(self.overlay_directories) > 0
+
+		# Src directories to copy config (copied recursively to target, default: source tree root)
+		self.src_directories: list[PatchingSrcDirectoryConfig] = [
+			PatchingSrcDirectoryConfig(data) for data in self.yaml_config.get("src-directories", [])
+		]
+		self.has_src_directories: bool = len(self.src_directories) > 0
 
 	def read_yaml_config(self, yaml_config_file_path):
 		with open(yaml_config_file_path) as f:

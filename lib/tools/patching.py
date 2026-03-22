@@ -331,6 +331,10 @@ if apply_patches:
 		pconfig, GIT_WORK_DIR, CONST_ROOT_TYPES_CONFIG_ORDER, ROOT_DIRS_BY_ROOT_TYPE, apply_patches_to_git, git_repo
 	)
 
+	# Include the src files (copied recursively to target, default: source tree root)
+	if pconfig.has_src_directories:
+		autopatcher_descriptions.extend(dt_makefile_patcher.copy_src_files(autopatcher_params))
+
 	# Loop over the VALID_PATCHES, and apply them
 	log.info(f"Applying {total_patches} patches {patch_file_desc}...")
 	# Grab the date of the root Makefile; that is the minimum date for the patched files.

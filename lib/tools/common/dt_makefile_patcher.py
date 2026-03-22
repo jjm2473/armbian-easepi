@@ -36,6 +36,7 @@ class AutoPatcherParams:
 		self.all_dt_files_copied: list[str] = []
 		self.dir_dt_files_copied: dict[str, list[str]] = {}
 		self.all_overlay_files_copied: list[str] = []
+		self.all_src_files_copied: list[str] = []
 
 
 class AutomaticPatchDescription:
@@ -328,4 +329,92 @@ def auto_patch_all_dt_makefiles(autopatcher_params: AutoPatcherParams) -> list[A
 			)
 			log.info(f"Committed changes to git: {commit.hexsha} for {one_autopatch_config.directory}")
 			log.info(f"Done with Makefile autopatch commit for {one_autopatch_config.directory}.")
+	return ret_desc_list
+
+
+def copy_src_files(autopatcher_params: AutoPatcherParams) -> list[AutomaticPatchDescription]:
+	"""Copy source code directories recursively to the target path (default: source tree root).
+
+	Similar to copy_bare_files for dt/overlay, but preserves the full subdirectory structure
+	of the source directory tree when copying.
+
+	YAML config format (src-directories):
+	  - source: "mysrc"        # subdir inside the patch root dir
+	    target: ""             # relative path in kernel source tree; "" means root
+	"""
+	ret_desc_list: list[AutomaticPatchDescription] = []
+
+	# Group src_directories by target
+	src_dirs_by_target: dict[str, list[str]] = {}
+	for one_src_dir in autopatcher_params.pconfig.src_directories:
+		target = one_src_dir.target if one_src_dir.target is not None else ""
+		if target not in src_dirs_by_target:
+			src_dirs_by_target[target] = []
+		src_dirs_by_target[target].append(one_src_dir.source)
+
+	for target_dir in src_dirs_by_target:
+		# Collect all files to copy as (relative_path, abs_source_path) tuples.
+		# Later entries (userpatches) override earlier ones (core) for the same relative path.
+		all_files_to_copy: list[tuple[str, str]] = []
+		src_source_dirs = src_dirs_by_target[target_dir]
+		full_path_target_dir = (
+			os.path.join(autopatcher_params.git_work_dir, target_dir)
+			if target_dir else autopatcher_params.git_work_dir
+		)
+
+		for one_src_dir in src_source_dirs:
+			for type_in_order in autopatcher_params.root_types_order:
+				root_dirs = autopatcher_params.root_dirs_by_root_type[type_in_order]
+				for root_dir in root_dirs:
+					full_path_source = os.path.join(root_dir.abs_dir, one_src_dir)
+					log.debug(f"Will recursively copy {full_path_source} to {full_path_target_dir}...")
+					if not os.path.isdir(full_path_source):
+						continue
+					for dirpath, _dirnames, filenames in os.walk(full_path_source):
+						for filename in filenames:
+							abs_src = os.path.join(dirpath, filename)
+							rel_path = os.path.relpath(abs_src, full_path_source)
+							all_files_to_copy.append((rel_path, abs_src))
+
+		# Dedup by relative path; last entry (userpatches) wins
+		all_files_to_copy_dict: dict[str, str] = {}
+		for rel_path, abs_src in all_files_to_copy:
+			all_files_to_copy_dict[rel_path] = abs_src
+
+		# Do the actual copy
+		all_copied_files: list[str] = []
+		overwritten_files: list[str] = []
+		for rel_path, abs_src in all_files_to_copy_dict.items():
+			full_path_target_file = os.path.join(full_path_target_dir, rel_path)
+			target_subdir = os.path.dirname(full_path_target_file)
+			if not os.path.exists(target_subdir):
+				os.makedirs(target_subdir)
+			if os.path.exists(full_path_target_file):
+				overwritten_files.append(full_path_target_file)
+				log.warning(f"Target src file '{rel_path}' already exists; will overwrite it.")
+			shutil.copyfile(abs_src, full_path_target_file)
+			all_copied_files.append(full_path_target_file)
+			autopatcher_params.all_src_files_copied.append(full_path_target_file)
+
+		target_label = target_dir if target_dir else "root"
+		desc = AutomaticPatchDescription()
+		desc.name = "Armbian Bare SRC auto-patch"
+		desc.description = f"Armbian Bare SRC files for {target_label}"
+		if len(overwritten_files) > 0:
+			desc.description += f" (overwriting {len(overwritten_files)} files)"
+			desc.name += f" (overwriting {len(overwritten_files)} files)"
+		desc.files = all_copied_files
+		desc.overwrites = overwritten_files
+		ret_desc_list.append(desc)
+
+		if autopatcher_params.apply_patches_to_git and len(all_copied_files) > 0:
+			autopatcher_params.git_repo.git.add(all_copied_files)
+			maintainer_actor: Actor = Actor("Armbian Bare SRC AutoPatcher", "patching@armbian.com")
+			commit = autopatcher_params.git_repo.index.commit(
+				message=f"Armbian Bare Source files for {target_label}",
+				author=maintainer_actor, committer=maintainer_actor, skip_hooks=True
+			)
+			log.info(f"Committed Bare SRC changes to git: {commit.hexsha} for {target_label}")
+			log.info(f"Done with Bare SRC autopatch commit for {target_label}.")
+
 	return ret_desc_list
