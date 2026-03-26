@@ -23,12 +23,6 @@ function post_family_tweaks__easepi_r2_hold_dtb() {
 	return 0
 }
 
-function post_family_tweaks__easepi_r2_root_part_size() {
-	display_alert "$BOARD" "Change easepi-r2 Root part size to 16GB" "info"
-	echo "30507008s" > "${SDCARD}/root/.rootfs_resize"
-	return 0
-}
-
 function post_family_tweaks__easepi_r2_naming_audios() {
 	display_alert "$BOARD" "Renaming easepi-r2 audios" "info"
 
