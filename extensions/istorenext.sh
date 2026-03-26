@@ -94,8 +94,10 @@ function pre_customize_image__istorenext_patch() {
 }
 
 function post_family_tweaks__istorenext_rootfs_part_size() {
-	display_alert "Change Rootfs part size to 16GB" "${EXTENSION}" "info"
-	echo "30507008s" > "${SDCARD}/root/.rootfs_resize"
+	display_alert "Change Rootfs part size to 12GB" "${EXTENSION}" "info"
+	echo "22118400s" > "${SDCARD}/root/.rootfs_resize"
+	display_alert "Make swap to 4GB" "${EXTENSION}" "info"
+	echo "4096" > "${SDCARD}/root/.mkswap_mb"
 	return 0
 }
 
