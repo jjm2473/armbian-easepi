@@ -113,9 +113,29 @@ do_expand_partition()
 		fi
 	fi
 
+	if [[ -f /root/.mkswap_mb ]]; then
+		read RESIZE_VALUE </root/.mkswap_mb
+		echo "MkSwap rule ${RESIZE_VALUE}MB defined for swap partition"
+		local swaplastsec=$(( $capacity * 99 / 100))
+		swaplastsec=$(( $swaplastsec - ($swaplastsec % (16 * 1024 * 1024 / $sectorsize)) - 1 ))
+		local swapsecs=$(( $RESIZE_VALUE * 1024 * 1024 / $sectorsize ))
+		[[ $swaplastsec -le $swapsecs ]] && swapsecs=$(( $swaplastsec + 1 ))
+		local swapfirstsec=$(( $swaplastsec + 1 - $swapsecs ))
+		swapfirstsec=$(( $swapfirstsec - ($swapfirstsec % (16 * 1024 * 1024 / $sectorsize)) ))
+	fi
+
 	# use 16MiB to align partitions since this is the erase block size of more recent SD cards
 	local lastsector=$(( $lastsector - ($lastsector % (16 * 1024 * 1024 / $sectorsize)) - 1 ))
-	[[ -n "$newpartition" ]] && local newpartition=$(( $newpartition - ($newpartition % (16 * 1024 * 1024 / $sectorsize)) ))
+	if [[ -n "$swapfirstsec" ]] && [[ $swapfirstsec -le $lastsector ]]; then
+		swapfirstsec=$(( $lastsector + 1 ))
+		if [[ $swaplastsec -le $swapfirstsec ]]; then
+			unset swapfirstsec swaplastsec
+		fi
+	fi
+	if [[ -n "$swapfirstsec" ]] && [[ -n "$newpartition" ]]; then
+		newpartition=$swapfirstsec
+	fi
+	[[ -n "$newpartition" ]] && local newpartition=$(( $newpartition - ($newpartition % (16 * 1024 * 1024 / $sectorsize)) - 1 ))
 
 	if [[ $lastsector -lt $partend ]]; then
 		echo -e "\n${partend} is larger than ${lastsector}s, that means you trying to shrink filesystem. Sorry, this tool designed for expanding only." >&2
@@ -157,11 +177,17 @@ do_expand_partition()
 			echo w
 		} | fdisk $diskdev
 	fi
+	if [[ -n "$swapfirstsec" ]]; then
+		{
+			echo n; echo p; echo ; echo $swapfirstsec; echo $swaplastsec
+			echo w
+		} | fdisk $diskdev
+	fi
 
 	echo -e "\nExecuting partprobe:"
 	# Workaround for Kernel bug in 5.8.y and up. Ignore partprobe returning error and inticating that fs is not expended while it is
 	KERNELID=$(uname -r |  awk -F'.' '{print ($1 * 100) + $2}')
-	if ! partprobe $rootdev && [[ ${KERNELID} -le 507 ]]; then
+	if ! partprobe $diskdev && [[ ${KERNELID} -le 507 ]]; then
 		echo -e "\n### [resize2fs] Automated reboot needed to finish the resize procedure"
 		touch /var/run/resize2fs-reboot
 	fi
@@ -176,6 +202,27 @@ do_expand_partition()
 	echo -e "New partition table:\n"
 	cat /proc/partitions
 
+	if [[ -n "$swapfirstsec" ]]; then
+		local swapindex=$(( $partindex + 1))
+		[[ -n "$newpartition" ]] && swapindex=$(( $partindex + 2 ))
+		local swappart=${partdev%$partindex}$swapindex
+		if [[ -b $swappart ]]; then
+			echo -e "\nCreate and enable swap on $swappart\n"
+			local source=$(blkid -o export $swappart | grep '^UUID=')
+			if [[ -n "$source" ]]; then
+				sed -i "/^$source/d" /etc/fstab
+			fi
+			local uuid=$(uuidgen)
+			source="UUID=$uuid"
+			mkswap -U $uuid $swappart
+			if ! grep -qE "^[[:space:]]+${source}[[:space:]]+swap[[:space:]]" /etc/fstab; then
+				echo "${source} swap swap defaults,nofail,discard=once,pri=0 0 0" >> /etc/fstab
+			fi
+			swapon -p 0 $swappart
+		else
+			echo -e "\nFail to find the swap partition: $swappart"
+		fi
+	fi
 	return 0
 }
 
