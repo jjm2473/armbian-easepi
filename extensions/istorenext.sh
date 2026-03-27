@@ -30,21 +30,24 @@ function extension_prepare_config__prepare_istorenext_config() {
 	fi
 
 	if [[ "${ARCH}" = "amd64" ]]; then
-		add_packages_to_image qemu-system-x86 qemu-system-arm qemu-utils \
+		add_packages_to_image qemu-system-x86 qemu-system-arm \
 		libvirt-daemon-system libvirt-clients virtinst ovmf qemu-efi-aarch64 cpu-checker
 	fi
 
 	add_packages_to_image python3-pip pipx nginx \
+		redis-server redis-tools \
 		curl wget git rsync procps gpg \
 		docker.io \
 		websockify \
 		chromium-headless-shell fonts-noto-cjk fonts-noto-color-emoji ${MONO_FONTS} \
 		7zip unrar zip unzip xz-utils \
-		parted e2fsprogs xfsprogs btrfs-progs ntfs-3g dosfstools exfatprogs mdadm smartmontools \
+		libheif-examples \
+		parted e2fsprogs xfsprogs btrfs-progs ntfs-3g dosfstools exfatprogs lvm2 mdadm smartmontools qemu-utils \
 		cifs-utils smbclient sshpass nfs-common rclone fuse3 \
+		minidlna netatalk samba winbind vsftpd avahi-daemon avahi-utils wsdd2 nfs-kernel-server \
 		aria2 qbittorrent-nox \
-		vim htop iproute2 dnsutils net-tools traceroute \
-		nftables \
+		vim htop iproute2 dnsutils net-tools traceroute ntpsec-ntpdate \
+		nftables conntrack bpftool miniupnpd \
 		openvswitch-switch \
 		modemmanager wpasupplicant hostapd \
 		isc-dhcp-client dhcpcd dnsmasq openresolv pppoe \
