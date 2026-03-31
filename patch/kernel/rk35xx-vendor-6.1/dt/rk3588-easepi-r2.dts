@@ -16,29 +16,31 @@
 	eth_order =  "0004:41:00.0,0002:21:00.0,0001:11:00.0,0003:31:00.0";
 
 	aliases {
-		led-boot = &led_red;
-		led-failsafe = &led_red;
-		led-running = &led_red;
-		led-upgrade = &led_red;
+		led-boot = &led_run;
+		led-failsafe = &led_run;
+		led-running = &led_run;
+		led-upgrade = &led_run;
 
 		mmc0 = &sdmmc;
 		mmc1 = &sdio;
 		mmc2 = &sdhci;
 	};
 
-	chosen: chosen {
-		bootargs = "earlycon=uart8250,mmio32,0xfeb50000 console=ttyFIQ0 coherent_pool=1m irqchip.gicv3_pseudo_nmi=0";
-	};
+	/delete-node/ chosen;
 
 	leds {
 		compatible = "gpio-leds";
 		pinctrl-names = "default";
-		pinctrl-0 = <&led_work_en>;
+		pinctrl-0 = <&led_run_en>, <&led_user_en>;
 
-		led_red: work {
-			label = "red:work";
+		led_run: led-0 {
+			label = "green:run";
 			linux,default-trigger = "heartbeat";
 			gpios = <&gpio3 RK_PB7 GPIO_ACTIVE_HIGH>;
+		};
+		led-1 {
+			label = "green:user";
+			gpios = <&gpio3 RK_PB6 GPIO_ACTIVE_HIGH>;
 		};
 	};
 
@@ -210,6 +212,21 @@
 		vin-supply = <&vcc5v0_sys>;
 	};
 
+#ifdef EASEPI_R2_OTG_USB3
+	vbus5v0_typec: vbus5v0-typec {
+		compatible = "regulator-fixed";
+		enable-active-high;
+		gpio = <&gpio3 RK_PA6 GPIO_ACTIVE_HIGH>;
+		pinctrl-names = "default";
+		pinctrl-0 = <&vbus5v0_typec_en>;
+		regulator-min-microvolt = <5000000>;
+		regulator-max-microvolt = <5000000>;
+		regulator-name = "vbus5v0_typec";
+		vin-supply = <&vcc5v0_sys>;
+	};
+#endif
+
+/*
 	wireless_bluetooth: wireless-bluetooth {
 		compatible = "bluetooth-platdata";
 		clocks = <&hym8563>;
@@ -222,7 +239,7 @@
 		BT,wake_gpio = <&gpio2 RK_PB6 GPIO_ACTIVE_HIGH>;
 		BT,wake_host_irq = <&gpio0 RK_PA0 GPIO_ACTIVE_HIGH>;
 	};
-
+*/
 	wireless_wlan: wireless-wlan {
 		compatible = "wlan-platdata";
 		wifi_chip_type = "ap6255";
@@ -504,8 +521,11 @@
 		};
 	};
 	leds {
-		led_work_en: led_work_en {
+		led_run_en: led_run_en {
 			rockchip,pins = <3 RK_PB7 RK_FUNC_GPIO &pcfg_pull_none>;
+		};
+		led_user_en: led_user_en {
+			rockchip,pins = <3 RK_PB6 RK_FUNC_GPIO &pcfg_pull_none>;
 		};
 	};
 
@@ -572,8 +592,8 @@
 	};
 
 	usb-typec {
-		usbc0_int: usbc0-int {
-			rockchip,pins = <1 RK_PA0 RK_FUNC_GPIO &pcfg_pull_up>;
+		vbus5v0_typec_en: vbus5v0-typec-en {
+			rockchip,pins = <3 RK_PA6 RK_FUNC_GPIO &pcfg_pull_none>;
 		};
 	};
 
@@ -712,8 +732,27 @@
 
 // bluetooth
 &uart9 {
-	pinctrl-0 = <&uart9m0_xfer &uart9m0_ctsn>;
+	pinctrl-0 = <&uart9m0_xfer &uart9m0_ctsn &uart9m0_rtsn>;
 	status = "okay";
+	uart-has-rtscts;
+	bluetooth {
+		compatible = "brcm,bcm4345c5";
+		clocks = <&hym8563>;
+		clock-names = "ext_clock";
+		/*
+		interrupt-parent = <&gpio0>;
+		interrupts = <RK_PA0 IRQ_TYPE_LEVEL_LOW>;
+		interrupt-names = "host-wakeup";
+		*/
+		host-wakeup-gpios = <&gpio0 RK_PA0 GPIO_ACTIVE_HIGH>;
+		device-wakeup-gpios = <&gpio2 RK_PB6 GPIO_ACTIVE_HIGH>;
+		shutdown-gpios = <&gpio2 RK_PB4 GPIO_ACTIVE_HIGH>;
+		max-speed = <1500000>;
+		pinctrl-names = "default";
+		pinctrl-0 = <&bt_reset_gpio &bt_wake_gpio &bt_irq_gpio>;
+		vbat-supply = <&vcc_3v3_s3>;
+		vddio-supply = <&vcc_1v8_s3>;
+	};
 };
 
 // type-c for firmware update
@@ -722,6 +761,10 @@
 };
 
 &u2phy0_otg {
+	rockchip,typec-vbus-det;
+#ifdef EASEPI_R2_OTG_USB3
+	vbus-supply = <&vbus5v0_typec>;
+#endif
 	status = "okay";
 };
 
@@ -729,12 +772,27 @@
 	status = "okay";
 };
 
+#ifdef EASEPI_R2_OTG_USB3
+&usbdp_phy0 {
+	rockchip,dp-lane-mux = <2 3>;
+	status = "okay";
+};
+
+&usbdp_phy0_u3 {
+	status = "okay";
+};
+#endif
+
 &usbdrd_dwc3_0 {
-	dr_mode = "peripheral";
 	extcon = <&u2phy0>;
+#ifdef EASEPI_R2_OTG_USB3
+	dr_mode = "otg";
+#else
+	dr_mode = "peripheral";
 	maximum-speed = "high-speed";
 	phys = <&u2phy0_otg>;
 	phy-names = "usb2-phy";
+#endif
 	status = "okay";
 };
 
