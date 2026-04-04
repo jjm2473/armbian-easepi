@@ -8,7 +8,7 @@ declare -g SKIP_ARMBIAN_REPO="yes"
 declare -g VENDOR="iStoreNextA"
 declare -g HOST="iStoreNext"
 declare -g CONSOLE_AUTOLOGIN="no"
-declare -g ROOTPWD="tobechanged"
+declare -g ROOTPWD="password"
 
 function pre_install_distribution_specific__istorenext_add_desktop_repo() {
 	display_alert "Preparing iStoreNext desktop repository..." "${EXTENSION}" "info"
