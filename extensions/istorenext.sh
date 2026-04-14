@@ -1,6 +1,7 @@
 enable_extension "ddnsto"
 enable_extension "jellyfin-ffmpeg"
 enable_extension "ndpi-upstream"
+enable_extension "accel-ppp"
 enable_extension "frp"
 enable_extension "sing-box"
 
