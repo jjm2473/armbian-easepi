@@ -1,0 +1,43 @@
+From: RoceOS <dev@roceos.com>
+Date: Thu, 17 Apr 2026
+Subject: [PATCH] brcmfmac: fix null-ptr deref in cfg80211_mgmt_tx when P2P disabled
+
+When operating in pure AP mode (no P2P), brcmf_p2p_send_action_frame()
+is called for every Action Frame, but p2p->bss_idx[P2PAPI_BSSCFG_PRIMARY].vif
+is NULL because P2P has never been initialized. This causes a kernel panic:
+
+  Internal error: Oops: 0000000096000006
+  pc : brcmf_p2p_send_action_frame+0x120/0x270
+  lr : brcmf_cfg80211_mgmt_tx+0x278/0x2c0
+
+The crash is triggered ~10 seconds after hostapd starts (regulatory Action
+Frames) or when any client connects, on RK3588 with vendor kernel 6.1.115.
+
+Fix: check BRCMF_P2P_STATUS_ENABLED before entering the P2P action frame
+path. If P2P is not enabled, report ack=false and skip the send entirely.
+
+Signed-off-by: RoceOS <dev@roceos.com>
+---
+Index: 6.1__rk35xx__arm64/drivers/net/wireless/broadcom/brcm80211/brcmfmac/cfg80211.c
+===================================================================
+--- 6.1__rk35xx__arm64.orig/drivers/net/wireless/broadcom/brcm80211/brcmfmac/cfg80211.c
++++ 6.1__rk35xx__arm64/drivers/net/wireless/broadcom/brcm80211/brcmfmac/cfg80211.c
+@@ -5197,8 +5197,16 @@ brcmf_cfg80211_mgmt_tx(struct wiphy *wip
+ 		brcmf_dbg(TRACE, "Action frame, cookie=%lld, len=%d, freq=%d\n",
+ 			  *cookie, le16_to_cpu(action_frame->len), freq);
+ 
+-		ack = brcmf_p2p_send_action_frame(cfg, cfg_to_ndev(cfg),
+-						  af_params);
++		/* Fix: guard against null P2P vif when P2P is not enabled.
++		 * brcmf_p2p_send_action_frame() accesses
++		 * p2p->bss_idx[P2PAPI_BSSCFG_PRIMARY].vif which is NULL
++		 * in pure AP mode, causing kernel panic.
++		 */
++		if (test_bit(BRCMF_P2P_STATUS_ENABLED, &cfg->p2p.status))
++			ack = brcmf_p2p_send_action_frame(cfg, cfg_to_ndev(cfg),
++							  af_params);
++		else
++			ack = false;
+ 
+ 		cfg80211_mgmt_tx_status(wdev, *cookie, buf, len, ack,
+ 					GFP_KERNEL);
