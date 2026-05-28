@@ -12,8 +12,7 @@
 
 / {
 	model = "EasePi R2";
-	compatible = "linkease,easepi-r2", "rockchip,rk3588";
-	eth_order =  "0004:41:00.0,0002:21:00.0,0001:11:00.0,0003:31:00.0";
+	compatible = "linkease,easepi-r2", "easepi,r2", "rockchip,rk3588";
 
 	aliases {
 		led-boot = &led_run;
@@ -25,8 +24,6 @@
 		mmc1 = &sdio;
 		mmc2 = &sdhci;
 	};
-
-	/delete-node/ chosen;
 
 	adc-keys-0 {
 		compatible = "adc-keys";
@@ -192,34 +189,6 @@
 		vin-supply = <&vcc5v0_sys>;
 	};
 
-#ifdef EASEPI_R2_OTG_USB3
-	vbus5v0_typec: vbus5v0-typec {
-		compatible = "regulator-fixed";
-		enable-active-high;
-		gpio = <&gpio3 RK_PA6 GPIO_ACTIVE_HIGH>;
-		pinctrl-names = "default";
-		pinctrl-0 = <&vbus5v0_typec_en>;
-		regulator-min-microvolt = <5000000>;
-		regulator-max-microvolt = <5000000>;
-		regulator-name = "vbus5v0_typec";
-		vin-supply = <&vcc5v0_sys>;
-	};
-#endif
-
-/*
-	wireless_bluetooth: wireless-bluetooth {
-		compatible = "bluetooth-platdata";
-		clocks = <&hym8563>;
-		clock-names = "ext_clock";
-		uart_rts_gpios = <&gpio4 RK_PC4 GPIO_ACTIVE_LOW>;// schematic wrongly connected to GPIO4_C3
-		pinctrl-names = "default", "rts_gpio";
-		pinctrl-0 = <&uart9m0_rtsn>, <&bt_reset_gpio>, <&bt_wake_gpio>, <&bt_irq_gpio>;
-		pinctrl-1 = <&uart9m0_gpios>;
-		BT,reset_gpio = <&gpio2 RK_PB4 GPIO_ACTIVE_HIGH>;
-		BT,wake_gpio = <&gpio2 RK_PB6 GPIO_ACTIVE_HIGH>;
-		BT,wake_host_irq = <&gpio0 RK_PA0 GPIO_ACTIVE_HIGH>;
-	};
-*/
 	wireless_wlan: wireless-wlan {
 		compatible = "wlan-platdata";
 		wifi_chip_type = "ap6255";
@@ -579,12 +548,6 @@
 
 	};
 
-	usb-typec {
-		vbus5v0_typec_en: vbus5v0-typec-en {
-			rockchip,pins = <3 RK_PA6 RK_FUNC_GPIO &pcfg_pull_none>;
-		};
-	};
-
 	wireless-bluetooth {
 		uart9m0_gpios: uart9m0-gpios {
 			rockchip,pins = <4 RK_PC4 RK_FUNC_GPIO &pcfg_pull_none>;
@@ -682,7 +645,6 @@
 
 // WiFi SDIO
 &sdio {
-	status = "okay";
 	pinctrl-0 = <&sdiom0_pins>;
 	max-frequency = <150000000>;
 	no-sd;
@@ -698,7 +660,8 @@
 	num-slots = <1>;
 	rockchip,default-sample-phase = <90>;
 	sd-uhs-sdr50;
-	sd-uhs-sdr104; //SDIO3.0
+	sd-uhs-sdr104; // SDIO 3.0
+	status = "okay";
 };
 
 &tsadc {
@@ -711,9 +674,8 @@
 };
 
 &uart2 {
-	// use fiq debugger instead of uart2
 	pinctrl-0 = <&uart2m0_xfer>;
-	status = "disabled";
+	status = "disabled";// Use FIQ debugger instead of UART2
 };
 
 &uart3 {
@@ -721,7 +683,7 @@
 	status = "okay";
 };
 
-// bluetooth
+// Bluetooth
 &uart9 {
 	pinctrl-0 = <&uart9m0_xfer &uart9m0_ctsn &uart9m0_rtsn>;
 	status = "okay";
@@ -746,16 +708,13 @@
 	};
 };
 
-// type-c for firmware update
+// Type-C for firmware update
 &u2phy0 {
 	status = "okay";
 };
 
 &u2phy0_otg {
 	rockchip,typec-vbus-det;
-#ifdef EASEPI_R2_OTG_USB3
-	vbus-supply = <&vbus5v0_typec>;
-#endif
 	status = "okay";
 };
 
@@ -763,31 +722,16 @@
 	status = "okay";
 };
 
-#ifdef EASEPI_R2_OTG_USB3
-&usbdp_phy0 {
-	rockchip,dp-lane-mux = <2 3>;
-	status = "okay";
-};
-
-&usbdp_phy0_u3 {
-	status = "okay";
-};
-#endif
-
 &usbdrd_dwc3_0 {
-	extcon = <&u2phy0>;
-#ifdef EASEPI_R2_OTG_USB3
-	dr_mode = "otg";
-#else
 	dr_mode = "peripheral";
+	extcon = <&u2phy0>;
 	maximum-speed = "high-speed";
 	phys = <&u2phy0_otg>;
 	phy-names = "usb2-phy";
-#endif
 	status = "okay";
 };
 
-// usb 3.0
+// USB 3.0
 &u2phy1 {
 	status = "okay";
 };
@@ -834,7 +778,7 @@
 	status = "okay";
 };
 
-// usb 2.0
+// USB 2.0
 &u2phy3 {
 	status = "okay";
 };
@@ -1006,7 +950,7 @@
 	status = "okay";
 };
 
-// hdmi tx
+// HDMI TX
 &i2s5_8ch {
 	status = "okay";
 };
@@ -1061,7 +1005,7 @@
 	rockchip,primary-plane = <ROCKCHIP_VOP2_ESMART3>;
 };
 
-//hdmi rx
+// HDMI RX
 &i2s7_8ch {
 	status = "okay";
 };
