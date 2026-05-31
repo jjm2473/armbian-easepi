@@ -5,7 +5,6 @@
 / {
 	compatible = "easepi,a2", "rockchip,rk3568";
 	model = "EasePi A2";
-	eth_order = "0000:01:00.0";
 
 	aliases {
 		ethernet0 = &pcie_eth0;

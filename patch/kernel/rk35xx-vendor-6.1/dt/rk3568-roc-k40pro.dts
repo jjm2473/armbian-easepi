@@ -11,7 +11,6 @@
 / {
 	compatible = "roceos,k40prov3", "rockchip,rk3568";
 	model = "ROCEOS K40PRO V3";
-	eth_order =  "fe010000.ethernet,fe2a0000.ethernet,0001:11:00.0,0000:01:00.0";
 
 	aliases {
 		ethernet2 = &pcie_eth2;
