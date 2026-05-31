@@ -19,5 +19,6 @@ function post_family_tweaks__easepi_a2_hold_dtb() {
 }
 
 function post_family_tweaks__easepi_a2_udev_network_interfaces() {
-	echo "DEFAULT_INTERFACE=eth0" >/root/.default-network
+	echo "DEFAULT_INTERFACE=eth0" > "${SDCARD}/root/.default-network"
+	echo "0000:01:00.0" > "${SDCARD}/etc/eth_order"
 }

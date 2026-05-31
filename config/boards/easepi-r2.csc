@@ -26,9 +26,9 @@ function post_family_tweaks__easepi_r2_hold_dtb() {
 function post_family_tweaks__easepi_r2_naming_audios() {
 	display_alert "$BOARD" "Renaming easepi-r2 audios" "info"
 
-	mkdir -p $SDCARD/etc/udev/rules.d/
-	echo 'SUBSYSTEM=="sound", ENV{ID_PATH}=="platform-hdmi0-sound", ENV{SOUND_DESCRIPTION}="HDMI0 Audio"' > $SDCARD/etc/udev/rules.d/90-naming-audios.rules
-	echo 'SUBSYSTEM=="sound", ENV{ID_PATH}=="platform-hdmiin-sound", ENV{SOUND_DESCRIPTION}="HDMI-In Audio"' >> $SDCARD/etc/udev/rules.d/90-naming-audios.rules
+	mkdir -p "${SDCARD}/etc/udev/rules.d/"
+	echo 'SUBSYSTEM=="sound", ENV{ID_PATH}=="platform-hdmi0-sound", ENV{SOUND_DESCRIPTION}="HDMI0 Audio"' > "${SDCARD}/etc/udev/rules.d/90-naming-audios.rules"
+	echo 'SUBSYSTEM=="sound", ENV{ID_PATH}=="platform-hdmiin-sound", ENV{SOUND_DESCRIPTION}="HDMI-In Audio"' >> "${SDCARD}/etc/udev/rules.d/90-naming-audios.rules"
 
 	return 0
 }
@@ -36,15 +36,15 @@ function post_family_tweaks__easepi_r2_naming_audios() {
 function post_family_tweaks__easepi_r2_udev_network_interfaces() {
 	display_alert "$BOARD" "Renaming EasePi R2 network interfaces to eth0-3 usb4g" "info"
 
-	mkdir -p $SDCARD/etc/udev/rules.d/
+	mkdir -p "${SDCARD}/etc/udev/rules.d/"
 	cat <<- EOF > "${SDCARD}/etc/udev/rules.d/70-persistent-net.rules"
-		SUBSYSTEM=="net", ACTION=="add", DRIVERS=="r8169", KERNELS=="0004:41:00.0", NAME:="eth0"
-		SUBSYSTEM=="net", ACTION=="add", DRIVERS=="r8169", KERNELS=="0002:21:00.0", NAME:="eth1"
-		SUBSYSTEM=="net", ACTION=="add", DRIVERS=="r8169", KERNELS=="0001:11:00.0", NAME:="eth2"
-		SUBSYSTEM=="net", ACTION=="add", DRIVERS=="r8169", KERNELS=="0003:31:00.0", NAME:="eth3"
+		SUBSYSTEM=="net", ACTION=="add", KERNELS=="0004:41:00.0", NAME:="eth0"
+		SUBSYSTEM=="net", ACTION=="add", KERNELS=="0002:21:00.0", NAME:="eth1"
+		SUBSYSTEM=="net", ACTION=="add", KERNELS=="0001:11:00.0", NAME:="eth2"
+		SUBSYSTEM=="net", ACTION=="add", KERNELS=="0003:31:00.0", NAME:="eth3"
 		SUBSYSTEM=="net", ACTION=="add", KERNELS=="fc800000.usb", NAME:="usb4g"
 	EOF
 
-	echo "DEFAULT_INTERFACE=eth3" >/root/.default-network
-
+	echo "DEFAULT_INTERFACE=eth3" > "${SDCARD}/root/.default-network"
+	echo "0004:41:00.0,0002:21:00.0,0001:11:00.0,0003:31:00.0" > "${SDCARD}/etc/eth_order"
 }
