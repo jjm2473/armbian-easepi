@@ -5,11 +5,11 @@ function pre_install_distribution_specific__sing-box() {
 	local CACHEDIR="${SRC}/cache/sing-box"
 	echo "Try download sing-box"
 	mkdir -p "${CACHEDIR}"
-	local version="1.13.13"
+	local version="1.13.19"
 	if [[ "${ARCH}" = "amd64" ]]; then
-		sha256='bb99cabf47694625db421ee17898f36cdc1f9c2cb5decf65b12bac8d8437e842'
+		sha256='ef88a9e577d474210867bd708933d042e9b70106529df2656182c9db90106aa1'
 	elif [[ "${ARCH}" = "arm64" ]]; then
-		sha256='d7fab87b921933eb281d8ee7bd5377cdd8228089f1f7c807c9363a6a2329286c'
+		sha256='7fe3597a95a3c5ad67477b1d7653b9ce097e0be7c676758eba1fcf558f353d57'
 	else
 		echo "sing-box is unsupported in this ARCH: ${ARCH}"
 		return 1
@@ -44,7 +44,7 @@ function pre_install_distribution_specific__sing-box() {
 
 function pre_customize_image__install_sing-box() {
 	display_alert "Install sing-box..." "${EXTENSION}" "info"
-	local version="1.13.13"
+	local version="1.13.19"
 	local dirname="sing-box-${version}-linux-${ARCH}"
 	local path="${SRC}/cache/sing-box/${dirname}.tar.gz"
 	mkdir -p "${SDCARD}/usr/local/bin"
