@@ -37,4 +37,5 @@ function post_family_tweaks__nanopir5c_udev_network_interfaces() {
 		SUBSYSTEM=="net", ACTION=="add", KERNELS=="0001:11:00.0", NAME:="lan1"
 		SUBSYSTEM=="net", ACTION=="add", KERNELS=="0002:21:00.0", NAME:="wan1"
 	EOF
+	echo "DEFAULT_INTERFACE=lan1" > "${SDCARD}/root/.default-network"
 }

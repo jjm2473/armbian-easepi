@@ -35,6 +35,7 @@ function post_family_tweaks__nanopir5s_udev_network_interfaces() {
 		SUBSYSTEM=="net", ACTION=="add", KERNELS=="0000:01:00.0", NAME:="lan1"
 		SUBSYSTEM=="net", ACTION=="add", KERNELS=="0001:11:00.0", NAME:="lan2"
 	EOF
+	echo "DEFAULT_INTERFACE=lan2" > "${SDCARD}/root/.default-network"
 }
 
 # We've an overlay (DEFAULT_OVERLAYS="nanopi-r5s-leds") to drive the LEDs. Disable armbian-led-state service.

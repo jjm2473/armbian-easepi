@@ -40,6 +40,7 @@ function post_family_tweaks__9tripod_x3568_v4_udev_network_interfaces() {
 		SUBSYSTEM=="net", ACTION=="add", KERNELS=="fe010000.ethernet", NAME:="eth0"
 		SUBSYSTEM=="net", ACTION=="add", KERNELS=="fe2a0000.ethernet", NAME:="eth1"
 	EOF
+	echo "DEFAULT_INTERFACE=eth1" > "${SDCARD}/root/.default-network"
 }
 
 function post_family_tweaks_bsp__9tripod_x3568_v4_enable_leds() {

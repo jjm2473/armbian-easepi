@@ -30,6 +30,7 @@ function post_family_tweaks__nanopi_r6c_naming_udev_network_interfaces() {
 		SUBSYSTEM=="net", ACTION=="add", KERNELS=="fe1c0000.ethernet", NAME:="wan1"
 		SUBSYSTEM=="net", ACTION=="add", KERNELS=="0003:31:00.0", NAME:="lan1"
 	EOF
+	echo "DEFAULT_INTERFACE=lan1" > "${SDCARD}/root/.default-network"
 }
 
 # Mainline U-Boot
