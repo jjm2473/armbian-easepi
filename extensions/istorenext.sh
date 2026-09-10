@@ -6,8 +6,8 @@ enable_extension "frp"
 enable_extension "sing-box"
 
 declare -g SKIP_ARMBIAN_REPO="yes"
-declare -g VENDOR="iStoreNextA"
-declare -g HOST="iStoreNext"
+declare -g VENDOR="iNextOSA"
+declare -g HOST="iNextOS"
 declare -g CONSOLE_AUTOLOGIN="no"
 declare -g ROOTPWD="password"
 
