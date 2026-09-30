@@ -19,6 +19,12 @@ function post_family_tweaks__easepi_a2_hold_dtb() {
 }
 
 function post_family_tweaks__easepi_a2_udev_network_interfaces() {
+
+	mkdir -p "${SDCARD}/etc/udev/rules.d/"
+	cat <<- EOF > "${SDCARD}/etc/udev/rules.d/70-persistent-net.rules"
+		SUBSYSTEM=="net", ACTION=="add", KERNELS=="0000:01:00.0", NAME:="eth0"
+	EOF
+
 	echo "DEFAULT_INTERFACE=eth0" > "${SDCARD}/root/.default-network"
 	echo "0000:01:00.0" > "${SDCARD}/etc/eth_order"
 }
